@@ -1,0 +1,18 @@
+{
+  "name": "artisticgod",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "author": "Techson",
+  "license": "ISC",
+  "dependencies": {
+    "discord.js": "^11.4.2",
+    "opusscript": "0.0.6",
+    "simple-youtube-api": "^5.1.1",
+    "ytdl-core": "^0.29.1",
+    "ffmpeg-binaries": "^4.0.0"
+  }
+}
