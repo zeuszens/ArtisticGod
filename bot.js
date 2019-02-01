@@ -19,6 +19,11 @@ client.on('disconnect', () => console.log('Bağlantım koptu ama merak etme heme
 
 client.on('reconnecting', () => console.log('Yeniden bağlandım!'));
 
+client.on('message', msg => {
+  if (msg.content === 'happiness sadness') {
+    msg.reply('All of the moments');
+  };
+
 client.on('message', async msg => { // eslint-disable-line
 	if (msg.author.bot) return undefined;
 	if (!msg.content.startsWith(PREFIX)) return undefined;
