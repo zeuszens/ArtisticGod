@@ -1,0 +1,12 @@
+{
+   "dev_ids": ["279935071165743105"],
+   "token": "NTM5NDM2NTEyMTYxNTYyNjM0.XLyvqA.h0Vbj__KkF2zW-C7KdbN-iI5RQo",
+   "command_char" : "!",
+   "logging" : {
+     "err" : true,
+     "out" : true
+   },
+  "givemelink": {
+    "endpoint": ""
+  }
+}

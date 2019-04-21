@@ -1,199 +1,174 @@
-const { Client, Util } = require('discord.js');
-const { TOKEN, PREFIX, GOOGLE_API_KEY } = require('./config');
-const YouTube = require('simple-youtube-api');
-const ytdl = require('ytdl-core');
+/*
+ *  _____     _ _    ____        _
+ * |_   _|_ _| | | _| __ )  ___ | |_
+ *   | |/ _` | | |/ /  _ \ / _ \| __|
+ *   | | (_| | |   <| |_) | (_) | |_
+ *   |_|\__,_|_|_|\_\____/ \___/ \__|
+ *
+ * http://github.com/nullabork/talkbot
+ */
 
-const client = new Client({ disableEveryone: true });
+//npm imports
+require('module-alias/register');
+var figlet = require('figlet');
 
-const youtube = new YouTube(GOOGLE_API_KEY);
+var path = require('path'),
+  paths = require('@paths');
 
-const queue = new Map();
+//helpers
+var commands = require('@commands'),
+  botStuff = require('@helpers/bot-stuff'),
+  MessageDetails = require('@models/MessageDetails'),
+  Common = require('@helpers/common'),
+  testing = require('@helpers/runtime-testing');
 
-client.on('warn', console.warn);
+//models
+var world = require('@models/World'),
+  Server = require('@models/Server'),
+  Command = require('@models/Command');
 
-client.on('error', console.error);
+// runtime testing
+testing.TestIfChildProcessIsWorkingHowDiscordIONeedsItTo();
+testing.TestIfGoogleEnvironmentVarIsSet();
 
-client.on('ready', () => console.log('Hazır!'));
+// Creates a client
+var bot = botStuff.bot;
 
-client.on('disconnect', () => console.log('Bağlantım koptu ama merak etme hemen bağlanacağım.'));
-
-client.on('reconnecting', () => console.log('Yeniden bağlandım!'));
-
-client.on('message', msg => {
-  if (msg.content === 'happiness sadness') {
-    msg.reply('All of the moments');
-  };
-
-client.on('message', async msg => { // eslint-disable-line
-	if (msg.author.bot) return undefined;
-	if (!msg.content.startsWith(PREFIX)) return undefined;
-
-	const args = msg.content.split(' ');
-	const searchString = args.slice(1).join(' ');
-	const url = args[1] ? args[1].replace(/<(.+)>/g, '$1') : '';
-	const serverQueue = queue.get(msg.guild.id);
-
-	let command = msg.content.toLowerCase().split(' ')[0];
-	command = command.slice(PREFIX.length)
-
-	if (command === 'çal') {
-		const voiceChannel = msg.member.voiceChannel;
-		if (!voiceChannel) return msg.channel.send('Müzik veya şarkı çalmam için bir ses kanalına bağlanmalısın yoksa beni nasıl duyacaksın???');
-		const permissions = voiceChannel.permissionsFor(msg.client.user);
-		if (!permissions.has('CONNECT')) {
-			return msg.channel.send('Şuan üzüldüm çünkü müzik kanalına bağlanamadım beni bağlayacak yetkin olmayabilir bir üstün gelsin bekliyorum!');
-		}
-		if (!permissions.has('SPEAK')) {
-			return msg.channel.send('Şarkı veya müzik hep bunu belirtiyorum neyse çalamadım bir üstün gelsin yetkin yok yetkin!');
-		}
-
-		if (url.match(/^https?:\/\/(www.youtube.com|youtube.com)\/playlist(.*)$/)) {
-			const playlist = await youtube.getPlaylist(url);
-			const videos = await playlist.getVideos();
-			for (const video of Object.values(videos)) {
-				const video2 = await youtube.getVideoByID(video.id); // eslint-disable-line no-await-in-loop
-				await handleVideo(video2, msg, voiceChannel, true); // eslint-disable-line no-await-in-loop
-			}
-			return msg.channel.send(`✅ Şarkı veya müzik çalma listesi: **${playlist.title}** eklendi!`);
-		} else {
-			try {
-				var video = await youtube.getVideo(url);
-			} catch (error) {
-				try {
-					var videos = await youtube.searchVideos(searchString, 10);
-					let index = 0;
-					msg.channel.send(`
-__**Şarkı veya müzik seç:**__
-${videos.map(video2 => `**${++index} -** ${video2.title}`).join('\n')}
-Listeden seç işte uzattırma.
-					`);
-					// eslint-disable-next-line max-depth
-					try {
-						var response = await msg.channel.awaitMessages(msg2 => msg2.content > 0 && msg2.content < 11, {
-							maxMatches: 1,
-							time: 10000,
-							errors: ['time']
-						});
-					} catch (err) {
-						console.error(err);
-						return msg.channel.send('Hadi çabuk söyle ne çalayım??');
-					}
-					const videoIndex = parseInt(response.first().content);
-					var video = await youtube.getVideoByID(videos[videoIndex - 1].id);
-				} catch (err) {
-					console.error(err);
-					return msg.channel.send('🆘 Olmayan bir şarkı ismi garipsin olmayan bir şeyi nasıl çalacağım???.');
-				}
-			}
-			return handleVideo(video, msg, voiceChannel);
-		}
-	} else if (command === 'geç') {
-		if (!msg.member.voiceChannel) return msg.channel.send('Bir ses kanalında değilsin kör müsün?!');
-		if (!serverQueue) return msg.channel.send('Atlayacak bir şarkı veya müzik yok nasıl atlayayım uzun atlama mı kısa atlama mı?.');
-		serverQueue.connection.dispatcher.end('Geç komutu zaten kullanıldı ne iş?');
-		return undefined;
-	} else if (command === 'dur') {
-		if (!msg.member.voiceChannel) return msg.channel.send('Ses kanalında değilsin nasıl durdurayım be!');
-		if (!serverQueue) return msg.channel.send('Çalan bir müzik veya şarkı yok ki durdurayım.');
-		serverQueue.songs = [];
-		serverQueue.connection.dispatcher.end('Dur komutu zaten kullanıldı bıktım be!');
-		return undefined;
-	} else if (command === 'ses') {
-		if (!msg.member.voiceChannel) return msg.channel.send('Ses kanalında değilsin!');
-		if (!serverQueue) return msg.channel.send('Çalmıyor çalmıyor çalmıyor of be.');
-		if (!args[1]) return msg.channel.send(`Şu anki ses: **${serverQueue.volume}**`);
-		serverQueue.volume = args[1];
-		serverQueue.connection.dispatcher.setVolumeLogarithmic(args[1] / 5);
-		return msg.channel.send(`Sesi ayarlayayım: **${args[1]}**`);
-	} else if (command === 'çalan') {
-		if (!serverQueue) return msg.channel.send('Hırsız.');
-		return msg.channel.send(`🎶 Şuan çalan şarkı veya müzik: **${serverQueue.songs[0].title}**`);
-	} else if (command === 'sıra') {
-		if (!serverQueue) return msg.channel.send('Ekmek sırası fırında hayde yallah.');
-		return msg.channel.send(`
-__**Şarkı veya müzik sırası:**__
-${serverQueue.songs.map(song => `**-** ${song.title}`).join('\n')}
-**Şuan çalan şarkı veya müzik:** ${serverQueue.songs[0].title}
-		`);
-	} else if (command === 'durdur') {
-		if (serverQueue && serverQueue.playing) {
-			serverQueue.playing = false;
-			serverQueue.connection.dispatcher.pause();
-			return msg.channel.send('⏸ Müzik veya şarkı durduruldu mutlu musun sanata engel olmayın -Etem.');
-		}
-		return msg.channel.send('Çalan bir şey yok.');
-	} else if (command === 'devam') {
-		if (serverQueue && !serverQueue.playing) {
-			serverQueue.playing = true;
-			serverQueue.connection.dispatcher.resume();
-			return msg.channel.send('▶ Müzik veya şarkı devam ediyor!');
-		}
-		return msg.channel.send('Çalan şey çalmıyor işte ne yapayım.');
-	}
-
-	return undefined;
+// FANCY SPLASH SCREEN
+figlet('TalkBot', function(err, data) {
+  console.log(data);
 });
 
-async function handleVideo(video, msg, voiceChannel, playlist = false) {
-	const serverQueue = queue.get(msg.guild.id);
-	console.log(video);
-	const song = {
-		id: video.id,
-		title: Util.escapeMarkdown(video.title),
-		url: `https://www.youtube.com/watch?v=${video.id}`
-	};
-	if (!serverQueue) {
-		const queueConstruct = {
-			textChannel: msg.channel,
-			voiceChannel: voiceChannel,
-			connection: null,
-			songs: [],
-			volume: 5,
-			playing: true
-		};
-		queue.set(msg.guild.id, queueConstruct);
+// when the server is ready to go
+bot.on('ready', function (evt) {
+  Common.out('Girdi: ' + bot.username + ' - (' + bot.id + ')');
+  world.startup();
+});
 
-		queueConstruct.songs.push(song);
+// if we get disconnected???
+bot.on('disconnect', function (evt) {
+  world.saveAll();
+  world.dispose();
+  Common.out('Gittim, geliyorum');
+  Common.out(evt);
+  bot.connect();
+});
 
-		try {
-			var connection = await voiceChannel.join();
-			queueConstruct.connection = connection;
-			play(msg.guild, queueConstruct.songs[0]);
-		} catch (error) {
-			console.error(`Ses kanalına bağlanamadım ağlayayım mı: ${error}`);
-			queue.delete(msg.guild.id);
-			return msg.channel.send(`Ses kanalına bağlanamadım: ${error}`);
-		}
-	} else {
-		serverQueue.songs.push(song);
-		console.log(serverQueue.songs);
-		if (playlist) return undefined;
-		else return msg.channel.send(`✅ **${song.title}** çalma sırasına eklendi!`);
-	}
-	return undefined;
-}
+// handle voice state updates
+bot.on('any', function (evt) {
+  var user_id = null;
+  var server_id = null;
+  var channel_id = null;
 
-function play(guild, song) {
-	const serverQueue = queue.get(guild.id);
+  if (evt.t == 'VOICE_STATE_UPDATE') {
 
-	if (!song) {
-		serverQueue.voiceChannel.leave();
-		queue.delete(guild.id);
-		return;
-	}
-	console.log(serverQueue.songs);
+    // if my master's voice status changes
+    if (evt.d) {
+      channel_id = evt.d.channel_id;
+      server_id = evt.d.guild_id;
+      user_id = evt.d.user_id;
+    }
 
-	const dispatcher = serverQueue.connection.playStream(ytdl(song.url))
-		.on('end', reason => {
-			if (reason === 'Çalan şeyin hızı yeterince yetmiyor.') console.log('Şarkı veya müzik bitti.');
-			else console.log(reason);
-			serverQueue.songs.shift();
-			play(guild, serverQueue.songs[0]);
-		})
-		.on('error', error => console.error(error));
-	dispatcher.setVolumeLogarithmic(serverQueue.volume / 5);
+    var server = world.servers[server_id];
+    if (server && server.isMaster(user_id)) {
+      world.checkMastersVoiceChannels(user_id);
+    }
+  }
+});
 
-	serverQueue.textChannel.send(`🎶 Müzik veya şarkı çalmaya başladı: **${song.title}**`);
-}
+// new servers arrive
+bot.on('guildCreate', function(server) {
+  var server_id = server.id;
 
-client.login(TOKEN);
+  //create server instance
+  let s = new Server(server_id,world);
+  //add the relationships
+  world.addServer(s);
+
+});
+
+// servers get deleted
+bot.on('guildDelete', function(server) {
+  if (!server) return; // why would we lose a server?
+                       // because the world isn't a marshmallow
+  var world_server = world.servers[server.id];
+  var name = world_server.server_name;
+  world.removeServer(world_server);
+  Common.out("O " + name + " silindi");
+});
+
+// when messages come in
+bot.on('message', function (username, user_id, channel_id, message, evt) {
+
+  if (!evt.d) return null;
+
+  var server_id = evt.d.guild_id;
+  var server = world.servers[server_id];
+
+  if (server == null) {
+    Common.error("Bulamadım " + channel_id);
+    return null;
+  }
+  
+  // is the message a command?
+  if (message.substring(0, commands.command_char.length) == commands.command_char) {
+
+    server.resetNeglectTimeout();
+
+    var parts = message.match(
+      new RegExp("(" + Common.escapeRegExp(commands.command_char) + ")([^ ]+)(.*)", "i")
+    );
+    
+    if (!parts || parts.length < 2) {
+      return;
+    }
+
+    var cmdChar = parts[1];
+    var cmdVerb = parts[2] || null;
+    var cmdArgs = (parts[3] && parts[3].trim().split(/\s+/)) || [];
+    var cmdMessage = (parts[3] || "").trim();
+
+    if (!cmdVerb || !cmdChar) {
+      return;
+    }
+
+    var msgDets = new MessageDetails({
+      channel_id: channel_id,
+      user_id: user_id,
+      bot: botStuff.bot,
+      world: world,
+      server: server,
+      username: username,
+      cmdChar: cmdChar,
+      cmd: cmdVerb,
+      args: cmdArgs,
+      message: cmdMessage,
+    });
+
+    var command = commands.get(msgDets.cmd);
+    if(!command) return;
+
+    //this is for the new way... v3 of writing commands, so we can use argument destructoring
+    if (command instanceof Command) {
+      command.execute({details : msgDets, input : msgDets, server, world});
+    } else {
+      command.execute.apply(this, [msgDets, server, world]);
+    }
+
+  } else {
+    // if its not a command speak it
+    var settings = server.getUserSettings(user_id);
+    if ( !settings.muted ) server.speak(message, channel_id, user_id, world);
+  }
+});
+
+// ctrl-c
+process.on('SIGINT', function () {
+  world.kill('SIGINT');
+});
+
+// something goes wrong we didnt think of or having got around to putting a band-aid fix on
+process.on('uncaughtException', function (err) {
+  Common.error(err);
+  world.kill('uncaughtException: ' + err.message);
+});

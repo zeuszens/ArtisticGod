@@ -1,0 +1,177 @@
+{
+  "en.general" : {
+    "auto" : ":key is now set to `default`. Talk bot will use the best or default settings for :key.",
+    "nope" : "Sorry, only a server admin or server manager can do this."
+  },
+  "en.set": {
+    "okay": "Set message for :lang",
+    "none": "no"
+  },
+  "en.who": {
+    "okay": "My :title is :name",
+    "none": "I have no :title :~(",
+  },
+  "en.ping": {
+    "okay": "pong",
+  },
+  "en.follow": {
+    "join": "You need to join a channel before I can follow you!",
+    "okay": "Evet, :title!",
+    "huh": "Evet, :title?",
+    "nope": "Sorry, :name is my :title today. Get them to :command_charpermit you",
+    "connecting": "Cant follow, currently connecting to voice",
+    "leaving": "Cant follow until we've left voice"
+  },
+  "en.defaults": {
+    "okay": "Sıfırlandı :D",
+  },
+  "en.unfollow": {
+    "okay": "Bye :title",
+    "nope": "Üzgünüm sen benim değilsin :title.",
+    "none": "I have no :title... would you like to be my :title?",
+    "connecting": "Cant unfollow, currently connecting to voice",
+    "leaving": "Cant unfollow, already leaving voice"
+  },
+  "en.permit": {
+    "okay": "I'll listen to :name now",
+    "nope": "Sorry I can't do that, you're not my :title.",
+    "none": "I don't see any legit names",
+    "huh": "I don't know who :name is?",
+  },
+  "en.unpermit": {
+    "okay": ":name talk to the hand",
+    "nope": "Sorry I can't do that, you're not my :title.",
+    "none": "I don't know who :name is?",
+    "deny": "Sorry I can't do that, you're not permitted.",
+  },
+  "en.leave": {
+    "nope": "Sorry I can't do that, you're not my :title."
+  },
+  "en.join": {
+    "nope": "Sorry I can't do that, you're not my :title.",
+    "none": "You're not in a voice channel?"
+  },
+  "en.lang": {
+    "okay": "OK, The server default is :lang. You can override it with mylang",
+    "nope": "Üzgünüm sen benim değilsin :title",
+  },
+  "en.mylang": {
+    "okay": "Tamam botun dili şimdi :lang.",
+    "no": "Sorry, I cant find the language :lang.",
+    "deny": "Sorry, you're not permitted",
+    "more" : "You must specify a language code. You can find codes with `:command_charmylangs`"
+  },
+  "en.myvoice": {
+    "okay": "Tamam botun sesi :voice. \n Notice! If you have set language and gender settings, they will be ignored until they are set again.",
+    "no": "Sorry, I cant find the voice :voice.",
+    "auto" : "Now the bot will choose the best voice and use your lang and gender settings.",
+    "more" : "You must specify a voice code. eg `:command_charmyvoice lily`",
+    "noped" : "Your :command_charmyvoice setting has been overriden and you must use the command again to enable."
+  },
+  "en.tolang": {
+    "okay": "Tamam şimdi çeviriliyor :lang.",
+    "deny": "Sorry, you're not permitted",
+    "nope": "Sorry, I dont have a voice for :lang",
+  },
+  "en.mygender": {
+    "okay": "Tamam botun cinsiyeti şimdi :gender.",
+    "deny": "Sorry, you're not permitted",
+  },
+  "en.mypitch": {
+    "okay": "OK, your personal pitch is now :pitch.",
+    "deny": "Sorry, you're not permitted",
+  },
+  "en.myspeed": {
+    "okay": "OK, your personal speed is now :speed.",
+    "deny": "Sorry, you're not permitted",
+  },
+  "en.sfx": {
+    "nope": "Sorry, only a server admin can set emojis",
+    "nosfx": "No SFX have been setup",
+    "okay": "Added sound effect for `:sfx_word`",
+    "notnotokay": "Removed sound effect for `:sfx_word`",
+    "clearallokay" : "Removed all sound effects",
+    "none": "Cannot find sfx word: `:sfx_word`",
+    "noper": "options: [URL: play sfx] | [command url: make an audio emoji]",
+    "needshttps": "Sound URLs can only be https urls",
+    "needsWord": "Requires a [word/emoji] after \":sfx_command\" action",
+    "needsURL": "Requires https url after the [word/emoji] \":sfx_word\"",
+    "nodelete": "You need to specify an action to perform such as set or del",
+    "usage": "Associate words or emojis with sound effect files"
+  },
+  "en.sfxusage": {
+    "soundurl" : "Add https sound Url to a word",
+    "list" : "List all sounds on server",
+    "del" : "Delete sound assinged to <word|emoji>",
+    "sfx" : "Play Https Url without adding",
+    "clearall" : "Clear all SFX"
+  },
+  "en.sidle": {
+    "nope": "You have to be an admin on this server to use this",
+    "okay": "Okay you're now the :title",
+    "none": "I have no :title",
+    "broken": "Something went wrong getting the voice channel, you might still have been made the :title"
+  },
+  "en.transfer": {
+    "okay": "Okay :name is now the :title",
+    "nopermissions" : "You cannot do this.",
+    "args": "Doesnt look like you typed that command right",
+    "unknownnick" : "I dont know this person",
+    "broken" : "Hmmm that didnt work on submit a bug on github",
+  },
+  "en.help": {
+  },
+  "en.langs" : {
+    "okay" : "```css\n :table \n```\n You can set your language with the `Code` or the `Alt` values.\nFor example:\n:command_charmylang au",
+    "longhelp" : "List of languages"
+  },
+  "en.voices" : {
+    "okay" : "```css\n :table \n```\n You can set your voice with the `Voice` or the `Alias` values.\nFor example:\n:command_charmyvoice sally",
+    "longhelp" : "List of voices, `:command_charvoices au`",
+    "more" : "You must specify a language code. eg `:command_charvoices au`.\nYou can find language codes with :command_charlangs"
+  },
+  "en.textrule" : {
+    "needsFind" : "You need to provide a word to find",
+    "none" : "Cannot find :find,\nTry copying the rule name from `:command_chartextrule list`, even the `\\` characters if there are any.",
+    "needsReplacement" : "Your replacement value does not seem to be valid",
+    "nope" : "Sorry you don't have permission to manage this server",
+    "addokay" : "Rule for :find added",
+    "delokay" : "Rule for :find deleted",
+    "norules": "No text replacement rules have been setup",
+    "clearallokay": "All rules cleared",
+  },
+  "en.import": {
+    "imported" : "Import complete",
+    "error" : "Could not Import File. Try googling INI file fomat.",
+    "invalid" : "Cannot find any valid data. current supports, :supports"
+  },
+  "en.textruleusage": {
+    "title" : "Text replacement rules",
+    "command" : "Find <find> and replace it with <replacement>",
+    "list" : "List all rules",
+    "del" : "Delete a rule by key",
+    "clearall" : "Clear all rules"
+  },
+  "en.details": {
+    "for" :  "voice settings for :user",
+    "none" : "No voice settings for :user",
+  },
+  "en.mute": {
+    "unmuted": "Looks like you were muted, you have been unmuted.",
+    "okay": "You're now muted",
+    "alreadymuted": "You're already muted",
+  },
+  "en.unmute": {
+    "unmuted": "Looks like you were muted, you have been unmuted.",
+    "okay": "You're now unmuted",
+    "alreadyunmuted": "You're already unmuted",
+  },
+  "en.tts": {
+    "notpermitted": "You have to be permitted to use this command",
+    "notinchannel": "Get the bot to join a voice channel before using this command",
+  },
+  "en.mytitle": {
+    "read": "I call you :title",
+    "set": "I'll now call you :title"
+  }
+}
